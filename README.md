@@ -19,6 +19,8 @@
 
 ### Massive Array Anti Pattern
 
+The below example Schema could result in Unbounded "employees" array. To the point where the Building document for City Hall grows beyond the 16 MB max size and no more employees can be added.
+
 ```json
 // Building Document
 {
