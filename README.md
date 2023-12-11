@@ -13,11 +13,11 @@
   - Pattern: [Embedded Approach](#massive-array-pattern-embedded)
   - Pattern: [Reference Approach](#massive-array-pattern-reference)
   - Pattern: [Extended Reference Approach](#massive-array-pattern-extended-reference)
-- Anti-Pattern: 
+- Anti-Pattern: [Massive Collections](#massive-collections-anti-pattern)
 
 
 
-### Massive Array Anti Pattern
+### Massive Array Anti-Pattern
 
 The below example Schema could result in Unbounded "employees" array. To the point where the Building document for City Hall grows beyond the 16 MB max size and no more employees can be added.
 
@@ -184,3 +184,9 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
   "state": "IN"
 }, ...]
 ```
+
+### Massive Collections Anti-Pattern
+
+Below is a screenshot of the same data separated into 365 collections or in 1 collection and the difference in size of the Database and Index. This is a direct result of the way that the underlying service "WiredTiger" which is used by MongoDB. Creating a separate file for each Collection. Anything beyond 10,000 collections results in performance degradation.
+
+![results](mongodb-anti-pattern-massive-collections.png)
