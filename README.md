@@ -94,7 +94,7 @@ Only Drawback to this approach is the need to aggregate data together using $loo
   "last": "Doe",
   "phone": "0987654321",
   "building_id": "abc123"
-}]
+}, ...]
 
 // Buildings Collection
 [{
@@ -172,7 +172,7 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
     "name": "City Hall",
     "state": "IN"
   }
-}]
+}, ...]
 
 // Buildings Collection
 [{
