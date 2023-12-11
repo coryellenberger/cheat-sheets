@@ -9,7 +9,7 @@
 
 ### Anti-Patterns (Patterns included)
 
-- Anti-Pattern: [Massive Arrays](massive-array-anti-pattern) or unbounded arrays
+- Anti-Pattern: [Massive Arrays](#massive-array-anti-pattern) or unbounded arrays
   - Pattern: 
 - Anti-Pattern: 
 
@@ -19,7 +19,6 @@
 
 ###### Employee and Building examples
 
-Ant
 ```json
 // Building Document
 {
