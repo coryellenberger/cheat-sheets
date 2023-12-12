@@ -9,11 +9,15 @@
 
 ## Anti-Patterns (solutioning Patterns included)
 
-- Anti-Pattern: [Massive Arrays](#massive-array-anti-pattern) or unbounded arrays
+- Anti-Pattern: [Massive Arrays or unbounded arrays](#massive-array-anti-pattern)
   - Pattern: [Embedded Approach](#massive-array-pattern-embedded)
   - Pattern: [Reference Approach](#massive-array-pattern-reference)
   - Pattern: [Extended Reference Approach](#massive-array-pattern-extended-reference)
 - Anti-Pattern: [Massive Collections](#massive-collections-anti-pattern)
+- Anti-Pattern: [Unnecessary Indexes](#unnecessary-indexes-anti-pattern) 
+  - Pattern: [Indexes are good](#indexes-are-good)
+- Anti-Pattern: [Bloated Documents](#bloated-documents-anti-pattern)
+- Anti-Pattern: [Case-insensitive queries without case-insensitive indexes](#case-insensitive-queries-without-indexes-anti-pattern)
 
 
 
@@ -132,7 +136,7 @@ Results of the Lookup above
   "name": "City Hall",
   "city": "Pawnee",
   "state": "IN",
-  "employees", [{
+  "employees": [{
     "_id": "zbc321",
     "first": "John",
     "last": "Doe",
@@ -144,6 +148,76 @@ Results of the Lookup above
     "last": "Doe",
     "phone": "0987654321",
     "building_id": "abc123"
+  }]
+}
+```
+
+### Massive Array Pattern Reverse Reference
+
+Similar Drawbacks to the reference pattern above as well as possible issue of unbounded array of Employees.
+
+```json
+// Employees Collection
+[{
+  // Employee Document
+  "_id": "zbc321",
+  "first": "John",
+  "last": "Doe",
+  "phone": "1234567890"
+}, {
+  // Employee Document
+  "_id": "232fff",
+  "first": "Jane",
+  "last": "Doe",
+  "phone": "0987654321"
+}, ...]
+
+// Buildings Collection
+[{
+  "_id": "abc123",
+  "name": "City Hall",
+  "city": "Pawnee",
+  "state": "IN",
+  "employees": ["zbc321", "232fff"]
+}, ...]
+```
+
+Example Lookup (JOIN) for above scenario
+
+```javascript
+db.buildings.aggregate(
+  [
+    {
+      $lookup: {
+        from: 'buildings',
+        localField: 'employees',
+        foreignField: '_id',
+        as: 'employee_info'
+      }
+    }
+  ]
+)
+```
+
+Results of the Lookup above
+
+```json
+{
+  "_id": "abc123",
+  "name": "City Hall",
+  "city": "Pawnee",
+  "state": "IN",
+  "employees": ["zbc321", "232fff"],
+  "employee_info": [{
+    "_id": "zbc321",
+    "first": "John",
+    "last": "Doe",
+    "phone": "1234567890"
+  }, {
+    "_id": "232fff",
+    "first": "Jane",
+    "last": "Doe",
+    "phone": "0987654321"
   }]
 }
 ```
@@ -187,6 +261,24 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
 
 ### Massive Collections Anti-Pattern
 
-Below is a screenshot of the same data separated into 365 collections or in 1 collection and the difference in size of the Database and Index. This is a direct result of the way that the underlying service "WiredTiger" which is used by MongoDB. Creating a separate file for each Collection. Anything beyond 10,000 collections results in performance degradation.
+Below is a screenshot of the same data separated into 365 collections or in 1 collection and the difference in size of the Database and Index.
+
+This is a direct result of the way that the underlying service "WiredTiger" which is used by MongoDB. Creating a separate file for each Collection. (WiredTiger opens all files on startup) Anything beyond 10,000 collections results in performance degradation.
 
 ![results](mongodb-anti-pattern-massive-collections.png)
+
+### Indexes are Good
+
+Indexes allow MongoDB to efficiently query data. If a query does not have an index to support it; MongoDB performs a Collection scan (Scanning every document in a collection). Collection Scans can be very slow. Frequently executed queries should have indexes.
+
+Should we just index every single data point? NO!
+
+### Unnecessary Indexes Anti-Pattern
+
+Indexes cost storage to exist; and more storage for every document references by the index. As the Collections grow the indexes will drain resources.
+
+This is a direct result of the way that the underlying service "WiredTiger" which is used by MongoDB. Creating a separate file for each Index. (WiredTiger opens all files on startup) It is recommended to have no more than 50 indexes per collection.
+
+### Bloated Documents Anti-Pattern
+
+### Case-Insensitive Queries without Indexes Anti-Pattern
