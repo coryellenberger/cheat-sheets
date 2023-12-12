@@ -7,19 +7,22 @@
 - Rule #4: Needing to access an object on it's own is a compelling reason to not embed it.
 - Rule #5: (Obvious but not) Design your Schema based on the unique needs of your Application.
 
+<br />
+
 ## Anti-Patterns (solutioning Patterns included)
 
 - Anti-Pattern: [Massive Arrays or unbounded arrays](#massive-array-anti-pattern)
-  - Pattern: [Embedded Approach](#massive-array-pattern-embedded)
-  - Pattern: [Reference Approach](#massive-array-pattern-reference)
-  - Pattern: [Extended Reference Approach](#massive-array-pattern-extended-reference)
+  - Solution: [Embedded Approach](#massive-array-solution--embedded)
+  - Solution: [Reference Approach](#massive-array-solution--reference)
+  - Solution: [Reverse Reference Approach](#massive-array-solution--reverse-reference)
+  - Solution: [Extended Reference Approach](#massive-array-solution--extended-reference)
 - Anti-Pattern: [Massive Collections](#massive-collections-anti-pattern)
 - Anti-Pattern: [Unnecessary Indexes](#unnecessary-indexes-anti-pattern) 
   - Pattern: [Indexes are good](#indexes-are-good)
 - Anti-Pattern: [Bloated Documents](#bloated-documents-anti-pattern)
 - Anti-Pattern: [Case-insensitive queries without case-insensitive indexes](#case-insensitive-queries-without-indexes-anti-pattern)
 
-
+<br />
 
 ### Massive Array Anti-Pattern
 
@@ -46,7 +49,9 @@ The below example Schema could result in Unbounded "employees" array. To the poi
 }
 ```
 
-### Massive Array Pattern Embedded
+<br />
+
+### Massive Array Solution: Embedded
 
 Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if the Building data is changing regularly. You will end up having to update multiple documents every time which comes at a cost.
 
@@ -79,8 +84,81 @@ Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if
 }, ...]
 ```
 
+<br />
 
-### Massive Array Pattern Reference
+### Massive Array Solution: Reference
+
+Similar Drawbacks to the reference pattern above as well as possible issue of unbounded array of Employees.
+
+```json
+// Employees Collection
+[{
+  // Employee Document
+  "_id": "zbc321",
+  "first": "John",
+  "last": "Doe",
+  "phone": "1234567890"
+}, {
+  // Employee Document
+  "_id": "232fff",
+  "first": "Jane",
+  "last": "Doe",
+  "phone": "0987654321"
+}, ...]
+
+// Buildings Collection
+[{
+  "_id": "abc123",
+  "name": "City Hall",
+  "city": "Pawnee",
+  "state": "IN",
+  "employees": ["zbc321", "232fff"]
+}, ...]
+```
+
+Example Lookup (JOIN) for above scenario
+
+```javascript
+db.buildings.aggregate(
+  [
+    {
+      $lookup: {
+        from: 'buildings',
+        localField: 'employees',
+        foreignField: '_id',
+        as: 'employee_info'
+      }
+    }
+  ]
+)
+```
+
+Results of the Lookup above
+
+```json
+{
+  "_id": "abc123",
+  "name": "City Hall",
+  "city": "Pawnee",
+  "state": "IN",
+  "employees": ["zbc321", "232fff"],
+  "employee_info": [{
+    "_id": "zbc321",
+    "first": "John",
+    "last": "Doe",
+    "phone": "1234567890"
+  }, {
+    "_id": "232fff",
+    "first": "Jane",
+    "last": "Doe",
+    "phone": "0987654321"
+  }]
+}
+```
+
+<br />
+
+### Massive Array Solution: Reverse Reference
 
 Only Drawback to this approach is the need to aggregate data together using $lookup (JOIN) which if done too often can also be costly.
 
@@ -152,77 +230,9 @@ Results of the Lookup above
 }
 ```
 
-### Massive Array Pattern Reverse Reference
+<br />
 
-Similar Drawbacks to the reference pattern above as well as possible issue of unbounded array of Employees.
-
-```json
-// Employees Collection
-[{
-  // Employee Document
-  "_id": "zbc321",
-  "first": "John",
-  "last": "Doe",
-  "phone": "1234567890"
-}, {
-  // Employee Document
-  "_id": "232fff",
-  "first": "Jane",
-  "last": "Doe",
-  "phone": "0987654321"
-}, ...]
-
-// Buildings Collection
-[{
-  "_id": "abc123",
-  "name": "City Hall",
-  "city": "Pawnee",
-  "state": "IN",
-  "employees": ["zbc321", "232fff"]
-}, ...]
-```
-
-Example Lookup (JOIN) for above scenario
-
-```javascript
-db.buildings.aggregate(
-  [
-    {
-      $lookup: {
-        from: 'buildings',
-        localField: 'employees',
-        foreignField: '_id',
-        as: 'employee_info'
-      }
-    }
-  ]
-)
-```
-
-Results of the Lookup above
-
-```json
-{
-  "_id": "abc123",
-  "name": "City Hall",
-  "city": "Pawnee",
-  "state": "IN",
-  "employees": ["zbc321", "232fff"],
-  "employee_info": [{
-    "_id": "zbc321",
-    "first": "John",
-    "last": "Doe",
-    "phone": "1234567890"
-  }, {
-    "_id": "232fff",
-    "first": "Jane",
-    "last": "Doe",
-    "phone": "0987654321"
-  }]
-}
-```
-
-### Massive Array Pattern Extended Reference
+### Massive Array Solution: Extended Reference
 
 Duplicate some but not all of the data in the 2 collections. We only duplicate the data that is frequently accessed together. Knowing that the Name and State for the building won't change often.
 
@@ -259,6 +269,8 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
 }, ...]
 ```
 
+<br />
+
 ### Massive Collections Anti-Pattern
 
 Below is a screenshot of the same data separated into 365 collections or in 1 collection and the difference in size of the Database and Index.
@@ -267,11 +279,15 @@ This is a direct result of the way that the underlying service "WiredTiger" whic
 
 ![results](mongodb-anti-pattern-massive-collections.png)
 
+<br />
+
 ### Indexes are Good
 
 Indexes allow MongoDB to efficiently query data. If a query does not have an index to support it; MongoDB performs a Collection scan (Scanning every document in a collection). Collection Scans can be very slow. Frequently executed queries should have indexes.
 
 Should we just index every single data point? NO!
+
+<br />
 
 ### Unnecessary Indexes Anti-Pattern
 
@@ -279,6 +295,10 @@ Indexes cost storage to exist; and more storage for every document references by
 
 This is a direct result of the way that the underlying service "WiredTiger" which is used by MongoDB. Creating a separate file for each Index. (WiredTiger opens all files on startup) It is recommended to have no more than 50 indexes per collection.
 
+<br />
+
 ### Bloated Documents Anti-Pattern
+
+<br />
 
 ### Case-Insensitive Queries without Indexes Anti-Pattern
