@@ -357,7 +357,9 @@ Suggested to watch the Video covering this topic: [Source](https://youtu.be/mHeP
 
 But to sum up: If you build Regex/Non-Regex for Case-Insensitive Queries without having Indexes you will have terrible performance of the query.
 
-Suggested to build Collation Indexes for Case Insensitive queries as it will greatly improve the speed of your Case-Insensitive Queries 
+Suggested to build Collation Indexes for Case Insensitive queries as it will greatly improve the speed of your Case-Insensitive Queries
+
+<br />
 
 ### Separating Data that is Accessed together Anti-Pattern
 
