@@ -220,7 +220,7 @@ db.buildings.aggregate(
 
 Results of the Lookup above
 
-```micronaut-mongodb-json
+```jsonpath
 {
   "_id": "abc123",
   "name": "City Hall",
@@ -248,7 +248,7 @@ Results of the Lookup above
 
 Duplicate some but not all of the data in the 2 collections. We only duplicate the data that is frequently accessed together. Knowing that the Name and State for the building won't change often.
 
-```micronaut-mongodb-json
+```json5
 // Employees Collection
 [{
   // Employee Document
@@ -317,7 +317,7 @@ In the example on the video. They have Summary data for a list of Women that wil
 
 This is a direct result of how "WiredTiger" stores and caches documents which is used by MongoDB. Storing all indexes and files on Disk. Then Storing all the indexes and files that are most commonly used in Memory. If the commonly used documents are larger; they will take up more memory.
 
-```micronaut-mongodb-json
+```json
 // InfluentialWomen Collection
 [{
   "_id": Object("abc123"),
@@ -332,7 +332,7 @@ This is a direct result of how "WiredTiger" stores and caches documents which is
 
 Updated to below to improve the performance of the Preview Data vs Detailed Data
 
-```micronaut-mongodb-json
+```javascript
 // InfluentialWomenSummary Collection
 [{
   "_id": Object("abc123"),
