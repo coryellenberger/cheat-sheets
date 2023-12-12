@@ -40,7 +40,7 @@
 
 The below example Schema could result in Unbounded "employees" array. To the point where the Building document for City Hall grows beyond the 16 MB max size and no more employees can be added.
 
-```json
+```micronaut-mongodb-json
 // Building Document
 {
   "_id": Object("abc123"),
@@ -67,7 +67,7 @@ The below example Schema could result in Unbounded "employees" array. To the poi
 
 Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if the Building data is changing regularly. You will end up having to update multiple documents every time which comes at a cost.
 
-```json
+```micronaut-mongodb-json
 // Employee Collection
 [{
   // Employee Document
@@ -102,7 +102,7 @@ Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if
 
 Similar Drawbacks to the reference pattern above as well as possible issue of unbounded array of Employees.
 
-```json
+```micronaut-mongodb-json
 // Employees Collection
 [{
   // Employee Document
@@ -147,7 +147,7 @@ db.buildings.aggregate(
 
 Results of the Lookup above
 
-```json
+```micronaut-mongodb-json
 {
   "_id": "abc123",
   "name": "City Hall",
@@ -174,7 +174,7 @@ Results of the Lookup above
 
 Only Drawback to this approach is the need to aggregate data together using $lookup (JOIN) which if done too often can also be costly.
 
-```json
+```micronaut-mongodb-json
 // Employees Collection
 [{
   // Employee Document
@@ -220,7 +220,7 @@ db.buildings.aggregate(
 
 Results of the Lookup above
 
-```json
+```micronaut-mongodb-json
 {
   "_id": "abc123",
   "name": "City Hall",
@@ -248,7 +248,7 @@ Results of the Lookup above
 
 Duplicate some but not all of the data in the 2 collections. We only duplicate the data that is frequently accessed together. Knowing that the Name and State for the building won't change often.
 
-```json
+```micronaut-mongodb-json
 // Employees Collection
 [{
   // Employee Document
@@ -317,7 +317,7 @@ In the example on the video. They have Summary data for a list of Women that wil
 
 This is a direct result of how "WiredTiger" stores and caches documents which is used by MongoDB. Storing all indexes and files on Disk. Then Storing all the indexes and files that are most commonly used in Memory. If the commonly used documents are larger; they will take up more memory.
 
-```json
+```micronaut-mongodb-json
 // InfluentialWomen Collection
 [{
   "_id": Object("abc123"),
@@ -332,7 +332,7 @@ This is a direct result of how "WiredTiger" stores and caches documents which is
 
 Updated to below to improve the performance of the Preview Data vs Detailed Data
 
-```json
+```micronaut-mongodb-json
 // InfluentialWomenSummary Collection
 [{
   "_id": Object("abc123"),
