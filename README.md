@@ -1,13 +1,13 @@
 # MongoDB
 
-###### Cheat Sheet is meant as a quick reference guide.
+###### This Cheat Sheet is NOT a Guide. This Cheat Sheet is meant to be a reminder/reference tool. Suggested to watch the Video's and understand the Rules/Patterns/Anti-Patterns and only use this as a quick reference. 
 
-##### The MongoDB Cheat Sheet came from a collation of information from the MongoDB Youtube Channel.
+##### The MongoDB Cheat Sheet came from a collation of information from the MongoDB Youtube Channel. Video's below:
 
-- [MongoDB Schema Design Best Practices](https://www.youtube.com/watch?v=QAqK-R9HUhc)
-- [Schema Design Anti-Patterns - Part 1](https://www.youtube.com/watch?v=8CZs-0it9r4)
-- [Schema Design Anti-Patterns - Part 2](https://www.youtube.com/watch?v=mHeP5IbozDU)
-- [Schema Design Anti-Patterns - Part 3](https://www.youtube.com/watch?v=dAN76_47WtA)
+- [MongoDB Schema Design Best Practices - Runtime 9:57](https://www.youtube.com/watch?v=QAqK-R9HUhc)
+- [Schema Design Anti-Patterns - Part 1 - Runtime 20:38](https://www.youtube.com/watch?v=8CZs-0it9r4)
+- [Schema Design Anti-Patterns - Part 2 - Runtime 25:52](https://www.youtube.com/watch?v=mHeP5IbozDU)
+- [Schema Design Anti-Patterns - Part 3 - Runtime 16:50](https://www.youtube.com/watch?v=dAN76_47WtA)
 
 
 
@@ -41,8 +41,8 @@
 The below example Schema could result in Unbounded "employees" array. To the point where the Building document for City Hall grows beyond the 16 MB max size and no more employees can be added.
 
 ```javascript
-// Building Document
-{
+// Buildings Collection
+[{
   "_id": Object("abc123"),
   "name": "City Hall",
   "city": "Pawnee",
@@ -58,7 +58,7 @@ The below example Schema could result in Unbounded "employees" array. To the poi
     "last": "Doe",
     "phone": "0987654321"
   }, ...]
-}
+}, ...]
 ```
 
 <br />
@@ -68,9 +68,8 @@ The below example Schema could result in Unbounded "employees" array. To the poi
 Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if the Building data is changing regularly. You will end up having to update multiple documents every time which comes at a cost.
 
 ```javascript
-// Employee Collection
+// Employees Collection
 [{
-  // Employee Document
   "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
@@ -82,7 +81,6 @@ Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if
     "state": "IN"
   }
 }, {
-  // Employee Document
   "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
@@ -105,13 +103,11 @@ Similar Drawbacks to the reference pattern above as well as possible issue of un
 ```javascript
 // Employees Collection
 [{
-  // Employee Document
   "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
   "phone": "1234567890"
 }, {
-  // Employee Document
   "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
@@ -177,14 +173,12 @@ Only Drawback to this approach is the need to aggregate data together using $loo
 ```javascript
 // Employees Collection
 [{
-  // Employee Document
   "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
   "phone": "1234567890",
   "building_id": Object("abc123")
 }, {
-  // Employee Document
   "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
@@ -251,7 +245,6 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
 ```javascript
 // Employees Collection
 [{
-  // Employee Document
   "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
@@ -261,7 +254,6 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
     "state": "IN"
   }
 }, {
-  // Employee Document
   "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
@@ -317,6 +309,8 @@ In the example on the video. They have Summary data for a list of Women that wil
 
 This is a direct result of how "WiredTiger" stores and caches documents which is used by MongoDB. Storing all indexes and files on Disk. Then Storing all the indexes and files that are most commonly used in Memory. If the commonly used documents are larger; they will take up more memory.
 
+Example of before Document model vs a better after Document model
+
 ```javascript
 // InfluentialWomen Collection
 [{
@@ -364,3 +358,110 @@ Suggested to watch the Video covering this topic: [Source](https://youtu.be/mHeP
 But to sum up: If you build Regex/Non-Regex for Case-Insensitive Queries without having Indexes you will have terrible performance of the query.
 
 Suggested to build Collation Indexes for Case Insensitive queries as it will greatly improve the speed of your Case-Insensitive Queries 
+
+### Separating Data that is Accessed together Anti-Pattern
+
+Suggested to watch the Video covering this topic: [Source](https://www.youtube.com/watch?v=dAN76_47WtA)
+
+This covers how you can go too far with separation of data into different Collections. If the data is frequently accessed together (JOIN) then it will result in slower queries on that data.
+
+Below is the example Before and After resolving Query Performance problems for a Report with the following requirements:
+- Basic Stats
+- Resources Available to Trade
+- Delegates
+- Names and Dates of last 5 Policy documents
+
+```javascript
+// Countries Collection
+[{
+  "_id": "finland",
+  "official_name": "Republic of Finland",
+  "capital": "Helsinki",
+  "languages": [
+    "Finnish",
+    "Swedish",
+    "Sami"      
+  ],
+  "population": 5528737
+}, ...]
+
+// Resources Collection
+[{
+  "_id": ObjectId("abc123"),
+  "country_id": "finland",
+  "lions": 32565,
+  "military_personnel": 0,
+  "pulp": 0,
+  "paper": 0
+}, ...]
+
+// Delegates Collection
+[{
+  "_id": ObjectId("zef222"),
+  "country_id": "finland",
+  "first_name": "Andy",
+  "last_name": "Fryer"
+}, {
+  "_id": ObjectId("zef234"),
+  "country_id": "finland",
+  "first_name": "Donna",
+  "last_name": "Beagle"
+}, ...]
+
+// Policies Collection
+[{
+  "_id": ObjectId("one242"),
+  "date-created": ISODate("2011-10-20"),
+  "status": "draft",
+  "title": "Country Defense Policy",
+  "country_id": "finland",
+  "policy": "Use lions in lieu of military for all self defense..."
+}, ...]
+```
+
+Cleanup of this to reduce on the # of $lookup (JOINs) required. To improve the performance; we should combine data that is frequently accessed together.
+
+There will result in some data duplication and keeping Policies and the Sub Policy documents in sync. But this is a little effort to keep in sync for a huge improvement to the query performance on the report.
+
+```javascript
+// Countries Collection
+[{
+  "_id": "finland",
+  "official_name": "Republic of Finland",
+  "capital": "Helsinki",
+  "languages": [
+    "Finnish",
+    "Swedish",
+    "Sami"      
+  ],
+  "population": 5528737,
+  "resources" : {
+    "lions": 32565,
+    "military_personnel": 0,
+    "pulp": 0,
+    "paper": 0
+  },
+  "delegates": [{
+    "first_name": "Andy",
+    "last_name": "Fryer"
+  }, {
+    "first_name": "Donna",
+    "last_name": "Beagle"
+  }],
+  "recent_policies": [{
+    "_id": ObjectId("one242"), // we can use this reference to get detailed data if needed
+    "date-created": ISODate("2011-10-20"),
+    "title": "Country Defense Policy",
+  }, ...]
+}, ...]
+
+// Policies Collection
+[{
+  "_id": ObjectId("one242"),
+  "date-created": ISODate("2011-10-20"),
+  "status": "draft",
+  "title": "Country Defense Policy",
+  "country_id": "finland",
+  "policy": "Use lions in lieu of military for all self defense..."
+}, ...]
+```
