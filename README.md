@@ -33,6 +33,7 @@
   - Caveat: [Indexes are good](#indexes-are-good)
 - Anti-Pattern: [Bloated Documents](#bloated-documents-anti-pattern)
 - Anti-Pattern: [Case-insensitive queries without case-insensitive indexes](#case-insensitive-queries-without-indexes-anti-pattern)
+- Anti-Pattern: [Separating Data that is accessed together](#separating-data-that-is-accessed-together-anti-pattern)
 
 <br />
 
