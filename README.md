@@ -1,4 +1,16 @@
 # MongoDB
+
+###### Cheat Sheet is meant as a quick reference guide.
+
+##### The MongoDB Cheat Sheet came from a collation of information from the MongoDB Youtube Channel.
+
+- [MongoDB Schema Design Best Practices](https://www.youtube.com/watch?v=QAqK-R9HUhc)
+- [Schema Design Anti-Patterns - Part 1](https://www.youtube.com/watch?v=8CZs-0it9r4)
+- [Schema Design Anti-Patterns - Part 2](https://www.youtube.com/watch?v=mHeP5IbozDU)
+- [Schema Design Anti-Patterns - Part 3](https://www.youtube.com/watch?v=dAN76_47WtA)
+
+
+
 ## Rules to Live by
 
 - Rule #1: Embed unless there is reason not to (see other rules). Data that is commonly accessed/updated together should be stored together.
@@ -12,36 +24,36 @@
 ## Anti-Patterns (solutioning Patterns included)
 
 - Anti-Pattern: [Massive Arrays or unbounded arrays](#massive-array-anti-pattern)
-  - Solution: [Embedded Approach](#massive-array-solution--embedded)
-  - Solution: [Reference Approach](#massive-array-solution--reference)
-  - Solution: [Reverse Reference Approach](#massive-array-solution--reverse-reference)
-  - Solution: [Extended Reference Approach](#massive-array-solution--extended-reference)
+  - Solution: [Embedded Approach](#massive-array-solution--embedded-pattern)
+  - Solution: [Reference Approach](#massive-array-solution--reference-pattern)
+  - Solution: [Reverse Reference Approach](#massive-array-solution--reverse-reference-pattern)
+  - Solution: [Extended Reference Approach](#massive-array-solution--extended-reference-pattern)
 - Anti-Pattern: [Massive Collections](#massive-collections-anti-pattern)
 - Anti-Pattern: [Unnecessary Indexes](#unnecessary-indexes-anti-pattern) 
-  - Pattern: [Indexes are good](#indexes-are-good)
+  - Caveat: [Indexes are good](#indexes-are-good)
 - Anti-Pattern: [Bloated Documents](#bloated-documents-anti-pattern)
 - Anti-Pattern: [Case-insensitive queries without case-insensitive indexes](#case-insensitive-queries-without-indexes-anti-pattern)
 
 <br />
 
-### Massive Array Anti-Pattern
+### Massive Array Anti-Pattern [Source](https://www.youtube.com/watch?v=8CZs-0it9r4)
 
 The below example Schema could result in Unbounded "employees" array. To the point where the Building document for City Hall grows beyond the 16 MB max size and no more employees can be added.
 
 ```json
 // Building Document
 {
-  "_id": "abc123",
+  "_id": Object("abc123"),
   "name": "City Hall",
   "city": "Pawnee",
   "state": "IN",
   "employees": [{
-    "_id": "zbc321",
+    "_id": Object("zbc321"),
     "first": "John",
     "last": "Doe",
     "phone": "1234567890"
   }, {
-    "_id": "232fff",
+    "_id": Object("232fff"),
     "first": "Jane",
     "last": "Doe",
     "phone": "0987654321"
@@ -51,7 +63,7 @@ The below example Schema could result in Unbounded "employees" array. To the poi
 
 <br />
 
-### Massive Array Solution: Embedded
+### Massive Array Solution: Embedded Pattern
 
 Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if the Building data is changing regularly. You will end up having to update multiple documents every time which comes at a cost.
 
@@ -59,24 +71,24 @@ Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if
 // Employee Collection
 [{
   // Employee Document
-  "_id": "zbc321",
+  "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
   "phone": "1234567890",
   "building": {
-    "_id": "abc123",
+    "_id": Object("abc123"),
     "name": "City Hall",
     "city": "Pawnee",
     "state": "IN"
   }
 }, {
   // Employee Document
-  "_id": "232fff",
+  "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
   "phone": "0987654321",
   "building": {
-    "_id": "abc123",
+    "_id": Object("abc123"),
     "name": "City Hall",
     "city": "Pawnee",
     "state": "IN"
@@ -86,7 +98,7 @@ Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if
 
 <br />
 
-### Massive Array Solution: Reference
+### Massive Array Solution: Reference Pattern
 
 Similar Drawbacks to the reference pattern above as well as possible issue of unbounded array of Employees.
 
@@ -94,13 +106,13 @@ Similar Drawbacks to the reference pattern above as well as possible issue of un
 // Employees Collection
 [{
   // Employee Document
-  "_id": "zbc321",
+  "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
   "phone": "1234567890"
 }, {
   // Employee Document
-  "_id": "232fff",
+  "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
   "phone": "0987654321"
@@ -108,11 +120,11 @@ Similar Drawbacks to the reference pattern above as well as possible issue of un
 
 // Buildings Collection
 [{
-  "_id": "abc123",
+  "_id": Object("abc123"),
   "name": "City Hall",
   "city": "Pawnee",
   "state": "IN",
-  "employees": ["zbc321", "232fff"]
+  "employees": [Object("zbc321"), Object("232fff")]
 }, ...]
 ```
 
@@ -158,7 +170,7 @@ Results of the Lookup above
 
 <br />
 
-### Massive Array Solution: Reverse Reference
+### Massive Array Solution: Reverse Reference Pattern
 
 Only Drawback to this approach is the need to aggregate data together using $lookup (JOIN) which if done too often can also be costly.
 
@@ -166,18 +178,18 @@ Only Drawback to this approach is the need to aggregate data together using $loo
 // Employees Collection
 [{
   // Employee Document
-  "_id": "zbc321",
+  "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
   "phone": "1234567890",
-  "building_id": "abc123"
+  "building_id": Object("abc123")
 }, {
   // Employee Document
-  "_id": "232fff",
+  "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
   "phone": "0987654321",
-  "building_id": "abc123"
+  "building_id": Object("abc123")
 }, ...]
 
 // Buildings Collection
@@ -232,7 +244,7 @@ Results of the Lookup above
 
 <br />
 
-### Massive Array Solution: Extended Reference
+### Massive Array Solution: Extended Reference Pattern
 
 Duplicate some but not all of the data in the 2 collections. We only duplicate the data that is frequently accessed together. Knowing that the Name and State for the building won't change often.
 
@@ -240,7 +252,7 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
 // Employees Collection
 [{
   // Employee Document
-  "_id": "zbc321",
+  "_id": Object("zbc321"),
   "first": "John",
   "last": "Doe",
   "phone": "1234567890",
@@ -250,7 +262,7 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
   }
 }, {
   // Employee Document
-  "_id": "232fff",
+  "_id": Object("232fff"),
   "first": "Jane",
   "last": "Doe",
   "phone": "0987654321",
@@ -262,7 +274,7 @@ Duplicate some but not all of the data in the 2 collections. We only duplicate t
 
 // Buildings Collection
 [{
-  "_id": "abc123",
+  "_id": Object("abc123"),
   "name": "City Hall",
   "city": "Pawnee",
   "state": "IN"
@@ -291,7 +303,7 @@ Should we just index every single data point? NO!
 
 ### Unnecessary Indexes Anti-Pattern
 
-Indexes cost storage to exist; and more storage for every document references by the index. As the Collections grow the indexes will drain resources.
+Indexes cost storage to exist; and more storage for every document referenced by an index. As the Collections grow the indexes will drain resources.
 
 This is a direct result of the way that the underlying service "WiredTiger" which is used by MongoDB. Creating a separate file for each Index. (WiredTiger opens all files on startup) It is recommended to have no more than 50 indexes per collection.
 
@@ -299,6 +311,56 @@ This is a direct result of the way that the underlying service "WiredTiger" whic
 
 ### Bloated Documents Anti-Pattern
 
+For commonly accessed documents; you want to target for smaller document sizes. It's ok to have large document sizes for less active collections. [Source](https://youtu.be/mHeP5IbozDU?t=502)
+
+In the example on the video. They have Summary data for a list of Women that will be loaded on the main page of the website and used very often. Then the Detailed view when clicking on one of the listed Women. By moving the Detailed data to it's own collection and referencing between the two; you reduce on the amount of data being cached as commonly accessed documents (EG: Summary view). Then the In Memory cache has more space to also store some of the Detailed documents that are more frequently visited.
+
+This is a direct result of how "WiredTiger" stores and caches documents which is used by MongoDB. Storing all indexes and files on Disk. Then Storing all the indexes and files that are most commonly used in Memory. If the commonly used documents are larger; they will take up more memory.
+
+```json
+// InfluentialWomen Collection
+[{
+  "_id": Object("abc123"),
+  "firstname": "Harriet",
+  "lastname": "Tulman",
+  "birthday": "1999-06-05",
+  "occupation": "Astronaut",
+  "quote": "lorem ipsum ...",
+  "hobbies": ["Tennis", "Writing"]
+}, ...]
+```
+
+Updated to below to improve the performance of the Preview Data vs Detailed Data
+
+```json
+// InfluentialWomenSummary Collection
+[{
+  "_id": Object("abc123"),
+  "firstname": "Harriet",
+  "lastname": "Tulman",
+  "detailed_id": Object("abc124")
+}, ...]
+
+// InfluentialWomenDetailed Collection
+[{
+  "_id": Object("abc124"),
+  "firstname": "Harriet",
+  "lastname": "Tulman",
+  "birthday": "1999-06-05",
+  "occupation": "Astronaut",
+  "quote": "lorem ipsum ...",
+  "hobbies": ["Tennis", "Writing"]
+}, ...]
+```
+
+In the above case; although there is a duplication of the Firstname/Lastname data. It's not likely to change and if so you can just update both documents. If you had data that was changing frequently; you might not want to duplicate the data...
+
 <br />
 
 ### Case-Insensitive Queries without Indexes Anti-Pattern
+
+Suggested to watch the Video covering this topic: [Source](https://youtu.be/mHeP5IbozDU?t=949)
+
+But to sum up: If you build Regex/Non-Regex for Case-Insensitive Queries without having Indexes you will have terrible performance of the query.
+
+Suggested to build Collation Indexes for Case Insensitive queries as it will greatly improve the speed of your Case-Insensitive Queries 
