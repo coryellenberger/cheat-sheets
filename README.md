@@ -37,7 +37,7 @@
 
 <br />
 
-### Massive Array Anti-Pattern [Source](https://www.youtube.com/watch?v=8CZs-0it9r4)
+### Massive Array Anti-Pattern
 
 The below example Schema could result in Unbounded "employees" array. To the point where the Building document for City Hall grows beyond the 16 MB max size and no more employees can be added.
 
