@@ -23,11 +23,11 @@
 
 ## Anti-Patterns (solutioning Patterns included)
 
-- Anti-Pattern: [Massive Arrays or unbounded arrays](#massive-array-anti-pattern)
-  - Solution: [Embedded Approach](#massive-array-solution--embedded-pattern)
-  - Solution: [Reference Approach](#massive-array-solution--reference-pattern)
-  - Solution: [Reverse Reference Approach](#massive-array-solution--reverse-reference-pattern)
-  - Solution: [Extended Reference Approach](#massive-array-solution--extended-reference-pattern)
+- Anti-Pattern: [Massive Arrays](#massive-array-anti-pattern)
+  - Solution: [Embedded Pattern](#massive-array-solution--embedded-pattern)
+  - Solution: [Reference Pattern](#massive-array-solution--reference-pattern)
+  - Solution: [Reverse Reference Pattern](#massive-array-solution--reverse-reference-pattern)
+  - Solution: [Extended Reference Pattern](#massive-array-solution--extended-reference-pattern)
 - Anti-Pattern: [Massive Collections](#massive-collections-anti-pattern)
 - Anti-Pattern: [Unnecessary Indexes](#unnecessary-indexes-anti-pattern) 
   - Caveat: [Indexes are good](#indexes-are-good)
