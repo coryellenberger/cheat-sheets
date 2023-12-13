@@ -9,7 +9,7 @@
 - [Schema Design Anti-Patterns - Part 2 - Runtime 25:52](https://www.youtube.com/watch?v=mHeP5IbozDU)
 - [Schema Design Anti-Patterns - Part 3 - Runtime 16:50](https://www.youtube.com/watch?v=dAN76_47WtA)
 
-
+<br />
 
 ## Rules to Live by
 
