@@ -99,7 +99,7 @@ Data Duplication isn't an issue in terms of storage cost. BUT can be an issue if
 
 ### Massive Array Solution: Reference Pattern
 
-Similar Drawbacks to the reference pattern above as well as possible issue of unbounded array of Employees.
+Only Drawback to this approach is the need to aggregate data together using $lookup (JOIN) which if done too often can also be costly.
 
 ```javascript
 // Employees Collection
